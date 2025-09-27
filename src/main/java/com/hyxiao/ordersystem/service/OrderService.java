@@ -26,6 +26,7 @@ public class OrderService {
     
     private final OrderRepository orderRepository;
     private final MessageProducerService messageProducerService;
+    private final DelayMessageService delayMessageService;
     
     /**
      * 创建订单
@@ -62,6 +63,9 @@ public class OrderService {
                 .build();
         
         messageProducerService.sendOrderCreatedMessage(orderMessage);
+        
+        // 发送延时取消消息（30分钟后执行）
+        delayMessageService.sendOrderTimeoutCancelMessage(orderMessage, 30);
         
         return savedOrder;
     }
