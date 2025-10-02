@@ -55,6 +55,48 @@ public class NotificationService {
     }
     
     /**
+     * 处理支付结果消息（通用入口）
+     */
+    @Transactional
+    public void processPaymentResult(PaymentMessage paymentMessage) {
+        log.info("开始处理支付结果消息: orderId={}, messageType={}, success={}", 
+                paymentMessage.getOrderId(), paymentMessage.getMessageType(), paymentMessage.isSuccess());
+        
+        try {
+            if (paymentMessage.isSuccess()) {
+                // 支付成功，发送成功通知
+                processPaymentSuccess(paymentMessage);
+            } else {
+                // 支付失败，发送失败通知
+                processPaymentFailure(paymentMessage);
+            }
+        } catch (Exception e) {
+            log.error("处理支付结果消息异常: orderId={}", paymentMessage.getOrderId(), e);
+        }
+    }
+    
+    /**
+     * 处理支付失败消息，发送通知
+     */
+    @Transactional
+    public void processPaymentFailure(PaymentMessage paymentMessage) {
+        log.info("开始处理支付失败通知: orderId={}, failureReason={}", 
+                paymentMessage.getOrderId(), paymentMessage.getFailureReason());
+        
+        try {
+            // 创建并发送支付失败通知
+            createAndSendFailureNotification(paymentMessage, NotificationType.SMS);
+            createAndSendFailureNotification(paymentMessage, NotificationType.EMAIL);
+            createAndSendFailureNotification(paymentMessage, NotificationType.PUSH);
+            
+            log.info("支付失败通知处理完成: orderId={}", paymentMessage.getOrderId());
+            
+        } catch (Exception e) {
+            log.error("处理支付失败通知异常: orderId={}", paymentMessage.getOrderId(), e);
+        }
+    }
+    
+    /**
      * 创建并发送指定类型的通知
      */
     private void createAndSendNotification(PaymentMessage paymentMessage, NotificationType type) {
@@ -80,6 +122,31 @@ public class NotificationService {
     }
     
     /**
+     * 创建并发送支付失败通知
+     */
+    private void createAndSendFailureNotification(PaymentMessage paymentMessage, NotificationType type) {
+        try {
+            // 创建失败通知记录
+            Notification notification = createFailureNotificationRecord(paymentMessage, type);
+            
+            // 模拟发送通知
+            boolean sendSuccess = simulateNotificationSend(notification);
+            
+            if (sendSuccess) {
+                // 发送成功
+                handleNotificationSuccess(notification);
+            } else {
+                // 发送失败
+                handleNotificationFailure(notification, "模拟发送失败");
+            }
+            
+        } catch (Exception e) {
+            log.error("创建并发送失败通知异常: orderId={}, type={}", 
+                    paymentMessage.getOrderId(), type.name(), e);
+        }
+    }
+    
+    /**
      * 创建通知记录
      */
     private Notification createNotificationRecord(PaymentMessage paymentMessage, NotificationType type) {
@@ -100,6 +167,32 @@ public class NotificationService {
         
         Notification savedNotification = notificationRepository.save(notification);
         log.info("通知记录创建成功: notificationId={}, type={}, orderId={}", 
+                notificationId, type.name(), paymentMessage.getOrderId());
+        
+        return savedNotification;
+    }
+    
+    /**
+     * 创建失败通知记录
+     */
+    private Notification createFailureNotificationRecord(PaymentMessage paymentMessage, NotificationType type) {
+        String notificationId = generateNotificationId();
+        String recipient = generateRecipient(paymentMessage.getUserId(), type);
+        
+        Notification notification = Notification.builder()
+                .notificationId(notificationId)
+                .orderId(paymentMessage.getOrderId())
+                .userId(paymentMessage.getUserId())
+                .type(type)
+                .status(NotificationStatus.SENDING)
+                .recipient(recipient)
+                .title(generateFailureNotificationTitle(type))
+                .content(generateFailureNotificationContent(paymentMessage, type))
+                .templateCode(generateFailureTemplateCode(type))
+                .build();
+        
+        Notification savedNotification = notificationRepository.save(notification);
+        log.info("失败通知记录创建成功: notificationId={}, type={}, orderId={}", 
                 notificationId, type.name(), paymentMessage.getOrderId());
         
         return savedNotification;
@@ -226,5 +319,35 @@ public class NotificationService {
     private String generateExternalId(NotificationType type) {
         String prefix = type.name().substring(0, Math.min(3, type.name().length()));
         return prefix + "_" + System.currentTimeMillis() + "_" + random.nextInt(10000);
+    }
+    
+    private String generateFailureNotificationTitle(NotificationType type) {
+        return switch (type) {
+            case SMS -> "支付失败通知";
+            case EMAIL -> "订单支付失败提醒";
+            case PUSH -> "您的订单支付失败";
+            default -> "支付通知";
+        };
+    }
+    
+    private String generateFailureNotificationContent(PaymentMessage paymentMessage, NotificationType type) {
+        String baseContent = String.format("您的订单 %s 支付失败，失败原因：%s", 
+                paymentMessage.getOrderId(), paymentMessage.getFailureReason());
+        
+        return switch (type) {
+            case SMS -> baseContent + "，请重新尝试支付。";
+            case EMAIL -> "尊敬的用户，" + baseContent + "，请检查支付信息后重新支付。";
+            case PUSH -> baseContent + "，点击重新支付。";
+            default -> baseContent;
+        };
+    }
+    
+    private String generateFailureTemplateCode(NotificationType type) {
+        return switch (type) {
+            case SMS -> "SMS_PAYMENT_FAILURE_001";
+            case EMAIL -> "EMAIL_PAYMENT_FAILURE_001";
+            case PUSH -> "PUSH_PAYMENT_FAILURE_001";
+            default -> "TEMPLATE_FAILURE_DEFAULT";
+        };
     }
 }

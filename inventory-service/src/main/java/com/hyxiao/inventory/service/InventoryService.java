@@ -4,6 +4,8 @@ import com.hyxiao.common.dto.InventoryMessage;
 import com.hyxiao.common.dto.OrderMessage;
 import com.hyxiao.inventory.model.Inventory;
 import com.hyxiao.inventory.repository.InventoryRepository;
+import com.hyxiao.common.message.template.MessageTemplate;
+import com.hyxiao.common.message.core.MessageSendResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -11,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.UUID;
 
 /**
@@ -23,7 +24,7 @@ import java.util.UUID;
 public class InventoryService {
     
     private final InventoryRepository inventoryRepository;
-    private final MessageProducerService messageProducerService;
+    private final MessageTemplate messageTemplate;
     
     /**
      * 处理订单创建消息，执行库存扣减
@@ -170,6 +171,6 @@ public class InventoryService {
                 .success(true)
                 .build();
         
-        messageProducerService.sendInventoryMessage(inventoryMessage, "inventory-success");
+        messageTemplate.sendInventoryDeductSuccess(inventoryMessage.getOrderId(), inventoryMessage);
     }
 }

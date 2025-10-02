@@ -5,6 +5,8 @@ import com.hyxiao.common.dto.OrderMessage;
 import com.hyxiao.order.model.Order;
 import com.hyxiao.common.enums.OrderStatus;
 import com.hyxiao.order.repository.OrderRepository;
+import com.hyxiao.common.message.template.MessageTemplate;
+import com.hyxiao.common.message.core.MessageSendResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +27,7 @@ import java.util.UUID;
 public class OrderService {
     
     private final OrderRepository orderRepository;
-    private final MessageProducerService messageProducerService;
-    private final DelayMessageService delayMessageService;
+    private final MessageTemplate messageTemplate;
     
     /**
      * 创建订单
@@ -62,10 +63,16 @@ public class OrderService {
                 .messageType("ORDER_CREATED")
                 .build();
         
-        messageProducerService.sendOrderCreatedMessage(orderMessage);
+        MessageSendResult result = messageTemplate.sendOrderCreated(savedOrder.getOrderId(), orderMessage);
+        if (!result.isSuccess()) {
+            log.error("订单创建消息发送失败: {}", result.getErrorMessage());
+        }
         
         // 发送延时取消消息（30分钟后执行）
-        delayMessageService.sendOrderTimeoutCancelMessage(orderMessage, 30);
+        MessageSendResult delayResult = messageTemplate.sendOrderTimeoutCancel(savedOrder.getOrderId(), orderMessage, 30);
+        if (!delayResult.isSuccess()) {
+            log.error("延时取消消息发送失败: {}", delayResult.getErrorMessage());
+        }
         
         return savedOrder;
     }

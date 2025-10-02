@@ -37,14 +37,17 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
 
-# RocketMQ 配置
-rocketmq:
-  endpoints: 192.168.1.4:8081
-  consumer:
-    group: order-consumer-group
-  producer:
-    group: order-producer-group
-    
+# 消息配置
+hyxiao:
+  message:
+    enabled: true
+    rocketmq:
+      endpoints: 192.168.1.4:8081
+    producer:
+      group: order-producer-group
+    consumer:
+      group: order-consumer-group
+
 # 日志配置
 logging:
   level:

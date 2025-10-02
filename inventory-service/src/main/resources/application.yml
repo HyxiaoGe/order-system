@@ -21,6 +21,17 @@ spring:
       ddl-auto: update
     show-sql: true
 
+# 消息配置
+hyxiao:
+  message:
+    enabled: true
+    rocketmq:
+      endpoints: 192.168.1.4:8081
+    producer:
+      group: inventory-producer-group
+    consumer:
+      group: inventory-consumer-group
+
 rocketmq:
   endpoints: 192.168.1.4:8081
   consumer:

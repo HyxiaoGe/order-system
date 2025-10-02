@@ -6,6 +6,8 @@ import com.hyxiao.payment.model.Payment;
 import com.hyxiao.common.enums.PaymentMethod;
 import com.hyxiao.common.enums.PaymentStatus;
 import com.hyxiao.payment.repository.PaymentRepository;
+import com.hyxiao.common.message.template.MessageTemplate;
+import com.hyxiao.common.message.core.MessageSendResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,7 @@ import java.util.UUID;
 public class PaymentService {
     
     private final PaymentRepository paymentRepository;
-    private final MessageProducerService messageProducerService;
+    private final MessageTemplate messageTemplate;
     private final Random random = new Random();
     
     /**
@@ -166,7 +168,7 @@ public class PaymentService {
                 .failureReason("系统异常: " + errorMessage)
                 .build();
         
-        messageProducerService.sendPaymentMessage(paymentMessage, "payment-failed");
+        messageTemplate.sendPaymentFailure(paymentMessage.getOrderId(), paymentMessage);
     }
     
     /**
@@ -186,7 +188,7 @@ public class PaymentService {
                 .success(true)
                 .build();
         
-        messageProducerService.sendPaymentMessage(paymentMessage, "payment-success");
+        messageTemplate.sendPaymentSuccess(paymentMessage.getOrderId(), paymentMessage);
     }
     
     /**
@@ -208,7 +210,7 @@ public class PaymentService {
                 .failureReason(payment.getFailureReason())
                 .build();
         
-        messageProducerService.sendPaymentMessage(paymentMessage, "payment-failed");
+        messageTemplate.sendPaymentFailure(paymentMessage.getOrderId(), paymentMessage);
     }
     
     /**

@@ -42,11 +42,6 @@
         </dependency>
         
         <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client-java</artifactId>
-        </dependency>
-        
-        <dependency>
             <groupId>com.hyxiao</groupId>
             <artifactId>common</artifactId>
         </dependency>

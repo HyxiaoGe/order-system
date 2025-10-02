@@ -64,12 +64,6 @@
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
         
-        <!-- RocketMQ -->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-client-java</artifactId>
-        </dependency>
-        
         <!-- 公共模块 -->
         <dependency>
             <groupId>com.hyxiao</groupId>

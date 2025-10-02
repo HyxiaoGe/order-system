@@ -51,11 +51,7 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<ApiResponse<Order>> getOrderById(@PathVariable String orderId) {
         Optional<Order> orderOpt = orderService.findOrderById(orderId);
-        if (orderOpt.isPresent()) {
-            return ResponseEntity.ok(ApiResponse.success(orderOpt.get()));
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return orderOpt.map(order -> ResponseEntity.ok(ApiResponse.success(order))).orElseGet(() -> ResponseEntity.notFound().build());
     }
     
     /**
