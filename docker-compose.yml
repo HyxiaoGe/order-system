@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  # 网关服务
+  gateway:
+    build: 
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    networks:
+      - nacos-network
+      - postgres-network
+      - rocketmq-network
+    environment:
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/order_system
+      - HYXIAO_MESSAGE_ROCKETMQ_ENDPOINTS=rocketmq:8081
+    restart: always
+
+  # 订单服务
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "9091:9091"
+    networks:
+      - nacos-network
+      - postgres-network
+      - rocketmq-network
+    environment:
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/order_system
+      - HYXIAO_MESSAGE_ROCKETMQ_ENDPOINTS=rocketmq:8081
+    restart: always
+
+  # 库存服务
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    ports:
+      - "9092:9092"
+    networks:
+      - nacos-network
+      - postgres-network
+      - rocketmq-network
+    environment:
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/order_system
+      - HYXIAO_MESSAGE_ROCKETMQ_ENDPOINTS=rocketmq:8081
+    restart: always
+
+  # 支付服务
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "9093:9093"
+    networks:
+      - nacos-network
+      - postgres-network
+      - rocketmq-network
+    environment:
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/order_system
+      - HYXIAO_MESSAGE_ROCKETMQ_ENDPOINTS=rocketmq:8081
+    restart: always
+
+  # 通知服务
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "9094:9094"
+    networks:
+      - nacos-network
+      - postgres-network
+      - rocketmq-network
+    environment:
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/order_system
+      - HYXIAO_MESSAGE_ROCKETMQ_ENDPOINTS=rocketmq:8081
+    restart: always
+
+  # 采购服务
+  procurement-service:
+    build:
+      context: ./procurement-service
+      dockerfile: Dockerfile
+    ports:
+      - "9095:9095"
+    networks:
+      - nacos-network
+      - postgres-network
+      - rocketmq-network
+    environment:
+      - SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR=nacos:8848
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:5432/order_system
+      - HYXIAO_MESSAGE_ROCKETMQ_ENDPOINTS=rocketmq:8081
+    restart: always
+
+# 定义网络
+networks:
+  nacos-network:
+    external: true
+    name: nacos_nacos-network
+  postgres-network:
+    external: true
+    name: postgresql_postgres-network
+  rocketmq-network:
+    external: true
+    name: rocketmq_rocketmq
