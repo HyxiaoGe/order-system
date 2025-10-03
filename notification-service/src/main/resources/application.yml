@@ -32,11 +32,6 @@ hyxiao:
     consumer:
       group: notification-consumer-group
 
-rocketmq:
-  endpoints: 192.168.1.4:8081
-  consumer:
-    group: notification-consumer-group
-
 logging:
   level:
     com.hyxiao.notification: INFO

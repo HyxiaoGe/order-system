@@ -4,6 +4,7 @@ import com.hyxiao.common.dto.InventoryMessage;
 import com.hyxiao.common.dto.OrderMessage;
 import com.hyxiao.inventory.model.Inventory;
 import com.hyxiao.inventory.repository.InventoryRepository;
+import com.hyxiao.inventory.dto.InventoryInfoDTO;
 import com.hyxiao.common.message.template.MessageTemplate;
 import com.hyxiao.common.message.core.MessageSendResult;
 import lombok.RequiredArgsConstructor;
@@ -140,8 +141,35 @@ public class InventoryService {
     }
     
     /**
-     * 初始化商品库存（用于测试）
+     * 增加库存（补货）
      */
+    @Transactional
+    public boolean addStock(String productId, Integer quantity, String procurementOrderId) {
+        log.info("库存补货: productId={}, quantity={}, procurementOrderId={}", 
+                productId, quantity, procurementOrderId);
+        
+        try {
+            Optional<Inventory> inventoryOpt = inventoryRepository.findByProductIdWithLock(productId);
+            
+            if (inventoryOpt.isEmpty()) {
+                log.warn("商品不存在，无法补货: productId={}", productId);
+                return false;
+            }
+            
+            Inventory inventory = inventoryOpt.get();
+            inventory.addStock(quantity);
+            inventoryRepository.save(inventory);
+            
+            log.info("库存补货成功: productId={}, 补货数量={}, 当前库存={}", 
+                    productId, quantity, inventory.getAvailableStock());
+            
+            return true;
+            
+        } catch (Exception e) {
+            log.error("库存补货异常: productId={}, procurementOrderId={}", productId, procurementOrderId, e);
+            return false;
+        }
+    }
     @Transactional
     public Inventory initializeInventory(String productId, String productName, Integer totalStock) {
         Inventory inventory = Inventory.builder()
@@ -172,5 +200,50 @@ public class InventoryService {
                 .build();
         
         messageTemplate.sendInventoryDeductSuccess(inventoryMessage.getOrderId(), inventoryMessage);
+    }
+    
+    /**
+     * 获取所有产品的库存信息
+     */
+    public java.util.List<InventoryInfoDTO> getAllInventoryInfo() {
+        log.info("获取所有产品库存信息");
+        
+        try {
+            return inventoryRepository.findAll().stream()
+                .map(inventory -> new InventoryInfoDTO(
+                    inventory.getProductId(),
+                    inventory.getProductName(),
+                    inventory.getAvailableStock(),
+                    inventory.getTotalStock(),
+                    inventory.getLockedStock()
+                ))
+                .collect(java.util.stream.Collectors.toList());
+        } catch (Exception e) {
+            log.error("获取所有库存信息失败", e);
+            return java.util.Collections.emptyList();
+        }
+    }
+    
+    /**
+     * 根据产品ID获取库存信息
+     */
+    public Optional<InventoryInfoDTO> getInventoryInfoByProductId(String productId) {
+        log.info("获取产品库存信息: productId={}", productId);
+        
+        try {
+            Optional<Inventory> inventoryOpt = inventoryRepository.findById(productId);
+            return inventoryOpt.map(inventory -> 
+                new InventoryInfoDTO(
+                    inventory.getProductId(),
+                    inventory.getProductName(),
+                    inventory.getAvailableStock(),
+                    inventory.getTotalStock(),
+                    inventory.getLockedStock()
+                )
+            );
+        } catch (Exception e) {
+            log.error("获取产品库存信息失败: productId={}", productId, e);
+            return Optional.empty();
+        }
     }
 }

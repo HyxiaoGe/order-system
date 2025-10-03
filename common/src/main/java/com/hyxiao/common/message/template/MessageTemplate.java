@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 /**
  * 消息模板类 - 提供便捷的消息发送方法
  */
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class MessageTemplate {
@@ -72,6 +71,29 @@ public class MessageTemplate {
      */
     public MessageSendResult sendNotification(String orderId, Object notificationMessage) {
         return messageSender.send("notification-topic", "notification", orderId, notificationMessage);
+    }
+    
+    // ==================== 采购相关消息 ====================
+    
+    /**
+     * 发送采购订单创建消息
+     */
+    public MessageSendResult sendProcurementOrderCreated(String orderId, Object procurementOrder) {
+        return messageSender.send("procurement-topic", "procurement-order-created", orderId, procurementOrder);
+    }
+    
+    /**
+     * 发送采购订单审批消息
+     */
+    public MessageSendResult sendProcurementOrderApproved(String orderId, Object procurementOrder) {
+        return messageSender.send("procurement-topic", "procurement-order-approved", orderId, procurementOrder);
+    }
+    
+    /**
+     * 发送库存补货消息
+     */
+    public MessageSendResult sendInventoryRestock(String productId, Object restockMessage) {
+        return messageSender.send("inventory-topic", "inventory-restock", productId, restockMessage);
     }
     
     // ==================== 通用方法 ====================

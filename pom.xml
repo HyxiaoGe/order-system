@@ -20,6 +20,7 @@
         <module>inventory-service</module>
         <module>payment-service</module>
         <module>notification-service</module>
+        <module>procurement-service</module>
         <module>gateway</module>
         <module>common</module>
     </modules>

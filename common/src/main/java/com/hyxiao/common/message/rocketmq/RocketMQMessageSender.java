@@ -21,7 +21,6 @@ import java.util.concurrent.CompletableFuture;
 /**
  * RocketMQ消息发送器实现
  */
-@Component
 @Slf4j
 public class RocketMQMessageSender implements MessageSender {
     

@@ -32,11 +32,6 @@ hyxiao:
     consumer:
       group: payment-consumer-group
 
-rocketmq:
-  endpoints: 192.168.1.4:8081
-  consumer:
-    group: payment-consumer-group
-
 logging:
   level:
     com.hyxiao.payment: INFO

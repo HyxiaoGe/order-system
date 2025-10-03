@@ -82,6 +82,17 @@ public class Inventory {
     }
     
     /**
+     * 增加库存（补货）
+     */
+    public void addStock(int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("补货数量必须大于0");
+        }
+        this.availableStock += quantity;
+        this.totalStock += quantity;
+    }
+    
+    /**
      * 确认库存扣减（最终扣减）
      */
     public void confirmDeduction(int quantity) {

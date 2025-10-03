@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 /**
  * 消息监控指标
  */
-@Component
 @RequiredArgsConstructor
 public class MessageMetrics {
     

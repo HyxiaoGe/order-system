@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 /**
  * 消息重试模板
  */
-@Component
 @RequiredArgsConstructor
 @Slf4j
 public class RetryTemplate {

@@ -44,7 +44,7 @@ public class MessageProperties {
         /**
          * RocketMQ服务器地址
          */
-        private String endpoints = "localhost:8081";
+        private String endpoints = "192.168.1.4:8081";
         
         /**
          * 请求超时时间

@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8087
 
 spring:
   application:
@@ -31,11 +31,6 @@ hyxiao:
       group: inventory-producer-group
     consumer:
       group: inventory-consumer-group
-
-rocketmq:
-  endpoints: 192.168.1.4:8081
-  consumer:
-    group: inventory-consumer-group
 
 logging:
   level:

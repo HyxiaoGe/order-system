@@ -1,33 +1,16 @@
 server:
-  port: 8088
+  port: 8086
 
 spring:
   application:
-    name: order-service
+    name: procurement-service
   
-  # Nacos配置
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 192.168.1.4:8848
-        namespace: public
-        group: DEFAULT_GROUP
-      config:
-        server-addr: 192.168.1.4:8848
-        namespace: public
-        group: DEFAULT_GROUP
-        file-extension: yml
-        import-check:
-          enabled: false
-  
-  # PostgreSQL 数据库配置
   datasource:
     url: jdbc:postgresql://192.168.1.4:5432/order_system
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
-    
-  # JPA 配置
+  
   jpa:
     hibernate:
       ddl-auto: update
@@ -36,6 +19,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+  
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.1.4:8848
 
 # 消息配置
 hyxiao:
@@ -44,23 +32,25 @@ hyxiao:
     rocketmq:
       endpoints: 192.168.1.4:8081
     producer:
-      group: order-producer-group
+      group: procurement-producer-group
     consumer:
-      group: order-consumer-group
+      group: procurement-service-group
 
 # 日志配置
 logging:
   level:
-    com.hyxiao.ordersystem: INFO
-    org.springframework.web: DEBUG
+    com.hyxiao: DEBUG
+    org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-# 管理端点配置
+# 管理端点
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   endpoint:
     health:
       show-details: always

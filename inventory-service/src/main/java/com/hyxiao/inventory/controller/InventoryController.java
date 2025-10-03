@@ -3,6 +3,7 @@ package com.hyxiao.inventory.controller;
 import com.hyxiao.common.dto.ApiResponse;
 import com.hyxiao.inventory.model.Inventory;
 import com.hyxiao.inventory.service.InventoryService;
+import com.hyxiao.inventory.dto.InventoryInfoDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +66,8 @@ public class InventoryController {
     }
     
     /**
-     * 初始化库存（测试用）
+     * 初始化库存（管理员使用）
+     * 用于新产品的初始库存设置或紧急情况下的库存初始化
      */
     @PostMapping("/init")
     public ResponseEntity<ApiResponse<Inventory>> initInventory(@RequestParam String productId,
@@ -82,4 +84,20 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<String>> health() {
         return ResponseEntity.ok(ApiResponse.success("库存服务运行正常"));
     }
+    
+    /**
+     * 获取所有产品的库存信息（为采购服务提供）
+     */
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<java.util.List<InventoryInfoDTO>>> getAllInventory() {
+        log.info("获取所有产品库存信息");
+        
+        try {
+            java.util.List<InventoryInfoDTO> inventoryList = inventoryService.getAllInventoryInfo();
+            return ResponseEntity.ok(ApiResponse.success(inventoryList));
+        } catch (Exception e) {
+            log.error("获取库存信息失败", e);
+            return ResponseEntity.ok(ApiResponse.error("获取库存信息失败"));
+        }
+}
 }
